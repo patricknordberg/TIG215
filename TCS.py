@@ -8,8 +8,8 @@ class Item:
 
 
 class Chocolate(Item):
-    def __init__(self, name: str, price: float, cost: float, quantity: int, wholesale_item: bool, flavour: str):
-        super().__init__(name, price, cost, quantity, wholesale_item)
+    def __init__(self, name: str, price: float, cost: float, wholesale_item: bool, flavour: str):
+        super().__init__(name, price, cost, wholesale_item)
         self.flavour = flavour
 
 

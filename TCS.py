@@ -1,10 +1,10 @@
 class Item:
-    def __init__(self, name: str, price: float, cost: float, quantity: int, wholesale_item: bool):
+    def __init__(self, name: str, price: float, cost: float, wholesale_item: bool):
         self.name = name
         self.price = price
         self.cost = cost
-        self.quantity = quantity
         self.wholesale_item = wholesale_item
+
 
 
 class Chocolate(Item):
@@ -29,18 +29,36 @@ class Category:
         self.category_list.append(Category(name))
 
 
+class Inventory:
+    def __init__(self):
+        self.storage = {}
+
+    def add_in_inventory(self, item: Item, quantity: int):
+        if item.name not in self.storage:
+            self.storage[item.name] = {"item": item, "quantity": quantity}
+        self.storage[item.name]["quantity"] += quantity
+
+
+    def total_inventory(self):
+        for name, data in self.storage.items():
+            item = data["item"]
+            quantity = data["quantity"]
+            print(f"{item.name} | Quantity: {quantity} | Price: {item.price}$")
 
 category = Category("")
 category.add_category("Chocolate Specials")
 category.add_category("Chocolate Truffles")
+inventory = Inventory()
+
+chocolate_bunnies = Item("Chocolate Bunnies", 5.95, 3.40, True)
+inventory.add_in_inventory(chocolate_bunnies, 2)
+
+inventory.total_inventory()
 
 
-print("Categories: ")
+
 category.choose_categories()
 
-chosen_category = input("Choose a category: ")
-if chosen_category in category.category_list:
-    print("Contents: ")
 
 
 

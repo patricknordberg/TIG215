@@ -35,7 +35,7 @@ class Inventory:
 
     def add_in_inventory(self, item: Item, quantity: int):
         if item.name not in self.storage:
-            self.storage[item.name] = {"item": item, "quantity": quantity}
+            self.storage[item.name] = {"item": item, "quantity": 0}
         self.storage[item.name]["quantity"] += quantity
 
 
@@ -51,7 +51,7 @@ category.add_category("Chocolate Truffles")
 inventory = Inventory()
 
 chocolate_bunnies = Item("Chocolate Bunnies", 5.95, 3.40, True)
-inventory.add_in_inventory(chocolate_bunnies, 2)
+inventory.add_in_inventory(chocolate_bunnies, 4)
 
 inventory.total_inventory()
 

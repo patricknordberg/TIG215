@@ -6,15 +6,6 @@ class Item:
         self.wholesale_item = wholesale_item
 
 
-
-class Chocolate(Item):
-    def __init__(self, name: str, price: float, cost: float, wholesale_item: bool, flavour: str):
-        super().__init__(name, price, cost, wholesale_item)
-        self.flavour = flavour
-
-
-
-
 class Category:
     def __init__(self, name: str):
         self.name = name
@@ -45,10 +36,18 @@ class Inventory:
             quantity = data["quantity"]
             print(f"{item.name} | Quantity: {quantity} | Price: {item.price}$")
 
+    def total_price(self, item: Item):
+        if item.name not in self.storage:
+            return 0
+        quantity = self.storage[item.name]["quantity"]
+        print(f"Total price for {item.name}: {item.price * quantity} $")
+
 category = Category("")
 inventory = Inventory()
 
 #products
+print("Inventory: ")
+
 chocolate_bunnies = Item("Chocolate Bunnies", 5.95, 3.40, True)
 dark_chocolate_truffles = Item("Dark Chocolate Truffles", 2.50, 1.43, True)
 chocolate_cigars = Item("Chocolate Cigars", 50.95, 29.11, True)
@@ -63,8 +62,7 @@ inventory.add_in_inventory(heart_of_chocolate, 10)
 inventory.add_in_inventory(caramels, 80)
 
 inventory.total_inventory()
-
-category.choose_categories()
+inventory.total_price(chocolate_bunnies)
 
 
 

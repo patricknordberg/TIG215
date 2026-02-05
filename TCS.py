@@ -46,16 +46,23 @@ class Inventory:
             print(f"{item.name} | Quantity: {quantity} | Price: {item.price}$")
 
 category = Category("")
-category.add_category("Chocolate Specials")
-category.add_category("Chocolate Truffles")
 inventory = Inventory()
 
+#products
 chocolate_bunnies = Item("Chocolate Bunnies", 5.95, 3.40, True)
-inventory.add_in_inventory(chocolate_bunnies, 4)
+dark_chocolate_truffles = Item("Dark Chocolate Truffles", 2.50, 1.43, True)
+chocolate_cigars = Item("Chocolate Cigars", 50.95, 29.11, True)
+caramels = Item("Caramels", 1.25, 0.71, True)
+heart_of_chocolate = Item("Heart of Chocolate", 37.95, 21.69, False)
+
+
+inventory.add_in_inventory(chocolate_bunnies, 20)
+inventory.add_in_inventory(dark_chocolate_truffles, 15)
+inventory.add_in_inventory(chocolate_cigars, 10)
+inventory.add_in_inventory(heart_of_chocolate, 10)
+inventory.add_in_inventory(caramels, 80)
 
 inventory.total_inventory()
-
-
 
 category.choose_categories()
 

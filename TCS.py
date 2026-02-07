@@ -6,43 +6,47 @@ class Item:
         self.wholesale_item = wholesale_item
 
 
-class Category:
-    def __init__(self, name: str):
-        self.name = name
-        self.category_list = []
-
-
-    def choose_categories(self):
-        for c in self.category_list:
-            print(c.name)
-
-    def add_category(self, name: str):
-        self.category_list.append(Category(name))
-
-
 class Inventory:
     def __init__(self):
         self.storage = {}
+        self.items = {}
 
-    def add_in_inventory(self, item: Item, quantity: int):
+    def add(self, item: Item, quantity: int):
         if item.name not in self.storage:
-            self.storage[item.name] = {"item": item, "quantity": 0}
-        self.storage[item.name]["quantity"] += quantity
+            self.storage[item.name] = quantity
+            self.items[item.name] = item
+        else:
+            self.storage[item.name] += quantity
+
+    def total_value(self):
+        total = 0
+        for name in self.items:
+            item = self.items[name]
+            quantity = self.storage[name]
+            total += item.price * quantity
+        return total
+
+
 
 
     def total_inventory(self):
-        for name, data in self.storage.items():
-            item = data["item"]
-            quantity = data["quantity"]
+        for name in self.items:
+            item = self.items[name]
+            quantity = self.storage[name]
+
             print(f"{item.name} | Quantity: {quantity} | Price: {item.price}$")
 
-    def total_price(self, item: Item):
+    def total_item_price(self, item: Item):
         if item.name not in self.storage:
             return 0
-        quantity = self.storage[item.name]["quantity"]
+        quantity = self.storage[item.name]
         print(f"Total price for {item.name}: {item.price * quantity} $")
 
-category = Category("")
+
+class ShoppingCart:
+    def __init__(self):
+        pass
+
 inventory = Inventory()
 
 #products
@@ -55,14 +59,14 @@ caramels = Item("Caramels", 1.25, 0.71, True)
 heart_of_chocolate = Item("Heart of Chocolate", 37.95, 21.69, False)
 
 
-inventory.add_in_inventory(chocolate_bunnies, 20)
-inventory.add_in_inventory(dark_chocolate_truffles, 15)
-inventory.add_in_inventory(chocolate_cigars, 10)
-inventory.add_in_inventory(heart_of_chocolate, 10)
-inventory.add_in_inventory(caramels, 80)
+inventory.add(chocolate_bunnies, 20)
+inventory.add(dark_chocolate_truffles, 15)
+inventory.add(chocolate_cigars, 10)
+inventory.add(heart_of_chocolate, 10)
+inventory.add(caramels, 80)
 
 inventory.total_inventory()
-inventory.total_price(chocolate_bunnies)
+inventory.total_item_price(chocolate_bunnies)
 
 
 

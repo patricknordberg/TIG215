@@ -63,7 +63,7 @@ class ShoppingCart(ItemTracker):
                 else:
                     self.storage[item.name] += quantity
             else:
-                print(f"Not enough in stock. {quantity} available.")
+                print(f"Not enough in stock. {available} available.")
 
     def remove(self, item: Item, quantity: int):
         if item.name in self.storage:
@@ -138,7 +138,8 @@ class TestShoppingCart(unittest.TestCase):
     def test_add_too_many(self):
         self.shopping_cart.add(self.item1, 6)
 
-        self.assertEqual(self.shopping_cart.storage["Test Chocolate"], )
+        self.assertNotIn("Test Chocolate", self.shopping_cart.storage)
+        self.assertEqual(self.inventory.storage["Test Chocolate"], 5)
 
 
 

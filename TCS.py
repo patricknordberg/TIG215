@@ -87,8 +87,9 @@ class ShoppingCart(ItemTracker):
 
 
 class Category: #A grouping of similar items
-    def __init__(self, item: Item):
-        self.item = item
+    def __init__(self):
+        self.categories = []
+
 #Display item name and price in that category
 
 
@@ -133,6 +134,11 @@ class TestShoppingCart(unittest.TestCase):
 
         self.assertEqual(self.inventory.storage["Test Chocolate"], 4)
         self.assertEqual(self.inventory.storage["Test Toffee"], 9)
+
+    def test_add_too_many(self):
+        self.shopping_cart.add(self.item1, 6)
+
+        self.assertEqual(self.shopping_cart.storage["Test Chocolate"], )
 
 
 

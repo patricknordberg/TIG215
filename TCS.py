@@ -86,6 +86,10 @@ class ShoppingCart(ItemTracker):
             print("Item not in cart!")
 
 
+class Category: #A grouping of similar items
+    def __init__(self, item: Item):
+        self.item = item
+#Display item name and price in that category
 
 
 

@@ -1,3 +1,5 @@
+import unittest
+
 class Item:
     def __init__(self, name: str, price: float, cost: float, wholesale_item: bool):
         self.name = name
@@ -6,7 +8,7 @@ class Item:
         self.wholesale_item = wholesale_item
 
 
-class Inventory:
+class ItemTracker:
     def __init__(self):
         self.storage = {}
         self.items = {}
@@ -18,6 +20,8 @@ class Inventory:
         else:
             self.storage[item.name] += quantity
 
+
+
     def total_value(self):
         total = 0
         for name in self.items:
@@ -26,15 +30,13 @@ class Inventory:
             total += item.price * quantity
         return total
 
-
-
-
-    def total_inventory(self):
+    def display(self):
         for name in self.items:
             item = self.items[name]
             quantity = self.storage[name]
+            print(f"{item.name} - Quantity: {quantity}")
 
-            print(f"{item.name} | Quantity: {quantity} | Price: {item.price}$")
+class Inventory(ItemTracker):
 
     def total_item_price(self, item: Item):
         if item.name not in self.storage:
@@ -43,30 +45,97 @@ class Inventory:
         print(f"Total price for {item.name}: {item.price * quantity} $")
 
 
-class ShoppingCart:
-    def __init__(self):
-        pass
+class ShoppingCart(ItemTracker):
+    def __init__(self, inventory: Inventory):
+        super().__init__()
+        self.inventory = inventory
+
+    def add(self, item: Item, quantity: int):
+        if item.name in self.inventory.storage:
+            available = self.inventory.storage[item.name]
+
+            if quantity <= available:
+                self.inventory.storage[item.name] -= quantity
+
+                if item.name not in self.storage:
+                    self.storage[item.name] = quantity
+                    self.items[item.name] = item
+                else:
+                    self.storage[item.name] += quantity
+            else:
+                print(f"Not enough in stock. {quantity} available.")
+
+    def remove(self, item: Item, quantity: int):
+        if item.name in self.storage:
+            available = self.storage[item.name]
+
+            if quantity <= available:
+                self.storage[item.name] -= quantity
+
+                if self.storage[item.name] == 0:
+                    del self.storage[item.name]
+                    del self.items[item.name]
+
+
+
+                self.inventory.storage[item.name] += quantity
+            else:
+                print(f"Too many to remove. {quantity} available to remove.")
+
+        else:
+            print("Item not in cart!")
+
+
+
+
 
 inventory = Inventory()
-
-#products
-print("Inventory: ")
-
-chocolate_bunnies = Item("Chocolate Bunnies", 5.95, 3.40, True)
-dark_chocolate_truffles = Item("Dark Chocolate Truffles", 2.50, 1.43, True)
-chocolate_cigars = Item("Chocolate Cigars", 50.95, 29.11, True)
-caramels = Item("Caramels", 1.25, 0.71, True)
-heart_of_chocolate = Item("Heart of Chocolate", 37.95, 21.69, False)
+cart = ShoppingCart(inventory)
 
 
-inventory.add(chocolate_bunnies, 20)
-inventory.add(dark_chocolate_truffles, 15)
-inventory.add(chocolate_cigars, 10)
-inventory.add(heart_of_chocolate, 10)
-inventory.add(caramels, 80)
 
-inventory.total_inventory()
-inventory.total_item_price(chocolate_bunnies)
+#test
+
+class TestShoppingCart(unittest.TestCase):
+    def setUp(self):
+        self.inventory = Inventory()
+        self.shopping_cart = ShoppingCart(self.inventory)
+
+        self.item1 = Item("Test Chocolate", 3.95, 6.95, True)
+        self.item2 = Item("Test Toffee", 1.95, 3.95, True)
+
+        self.inventory.add(self.item1, 5)
+        self.inventory.add(self.item2, 10)
+
+
+    def test_add(self):
+        self.shopping_cart.add(self.item1, 3)
+        self.shopping_cart.add(self.item2, 5)
+
+        self.assertEqual(self.shopping_cart.storage["Test Chocolate"], 3)
+        self.assertEqual(self.shopping_cart.storage["Test Toffee"], 5)
+
+        self.assertEqual(self.inventory.storage["Test Chocolate"], 2)
+        self.assertEqual(self.inventory.storage["Test Toffee"], 5)
+
+    def test_remove(self):
+        self.shopping_cart.add(self.item1, 3)
+        self.shopping_cart.add(self.item2, 5)
+        self.shopping_cart.remove(self.item1, 2)
+        self.shopping_cart.remove(self.item2, 4)
+
+        self.assertEqual(self.shopping_cart.storage["Test Chocolate"], 1)
+        self.assertEqual(self.shopping_cart.storage["Test Toffee"], 1)
+
+        self.assertEqual(self.inventory.storage["Test Chocolate"], 4)
+        self.assertEqual(self.inventory.storage["Test Toffee"], 9)
+
+
+
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 
 

@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 class Item:
     def __init__(self, name: str, price: float, cost: float, wholesale_item: bool):
@@ -87,20 +88,86 @@ class ShoppingCart(ItemTracker):
 
 
 class Category: #A grouping of similar items
-    def __init__(self):
-        self.categories = []
+    def __init__(self, name: str):
+        self.name = name
+        self.items = []
+
+
+    def add_item(self, item: Item):
+        self.items.append(item)
+
+    def display_items(self):
+        for item in self.items:
+            print(f"{item.name} | {item.price} $")
 
 #Display item name and price in that category
 
+class Order:
+    def __init__(self, cart: ShoppingCart, inventory: Inventory):
+        self.cart = cart
+        self.inventory = inventory
+        self.order_time = None
+        self.items = {}
 
+    def place_order(self):
+        self.items = self.cart.storage.copy()
+        self.item_objects = self.cart.items.copy()
+        self.order_time = datetime.now()
+        self.cart.storage = {}
+        self.cart.items = {}
+
+    def total_value(self):
+        total = 0
+        for item_name, quantity in self.items.items():
+            item = self.item_objects[item_name]
+            total += item.price * quantity
+        return total
+
+    def display_order(self):
+        print(f"Order placed at {self.order_time}")
+        print(f"Items ordered: ")
+        for item_name, quantity in self.items.items():
+            item = self.item_objects[item_name]
+            print(f"{item_name} | {quantity} | {item.price} $")
+        print(f"Total cost: {self.total_value()}$")
+
+marabou = Item("Marabou", 3.95, 0.95, True)
+fazer = Item("Fazer", 3.50, 0.9, True)
+lindt = Item("Lindt", 6.95, 1.5, True)
+excellanz = Item("Excellanz", 7.95, 1, True)
+
+milk_chocolates = Category("Milk Chocolates")
+dark_chocolates = Category("Dark Chocolates")
 
 inventory = Inventory()
 cart = ShoppingCart(inventory)
 
 
+milk_chocolates.add_item(marabou)
+milk_chocolates.add_item(fazer)
+dark_chocolates.add_item(lindt)
+dark_chocolates.add_item(excellanz)
 
+milk_chocolates.display_items()
+dark_chocolates.display_items()
+
+print("")
+print("")
+print("")
+
+inventory.add(marabou, 5)
+inventory.add(lindt, 3)
+
+cart.add(marabou, 2)
+cart.add(lindt, 1)
+
+order = Order(cart, inventory)
+order.place_order()
+order.display_order()
 #test
-
+print("")
+print("")
+print("")
 class TestShoppingCart(unittest.TestCase):
     def setUp(self):
         self.inventory = Inventory()
@@ -136,10 +203,12 @@ class TestShoppingCart(unittest.TestCase):
         self.assertEqual(self.inventory.storage["Test Toffee"], 9)
 
     def test_add_too_many(self):
-        self.shopping_cart.add(self.item1, 6)
+        self.shopping_cart.add(self.item1, 9)
 
         self.assertNotIn("Test Chocolate", self.shopping_cart.storage)
         self.assertEqual(self.inventory.storage["Test Chocolate"], 5)
+
+
 
 
 

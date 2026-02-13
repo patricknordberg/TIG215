@@ -92,7 +92,6 @@ class Category: #A grouping of similar items
         self.name = name
         self.items = []
 
-
     def add_item(self, item: Item):
         self.items.append(item)
 
@@ -130,6 +129,17 @@ class Order:
             item = self.item_objects[item_name]
             print(f"{item_name} | {quantity} | {item.price} $")
         print(f"Total cost: {self.total_value()}$")
+        print("")
+
+    def print_receipt(self):
+        print("Receipt")
+        print(f"Date: {self.order_time}")
+        print("--------------------------------------------")
+        for item_name, quantity in self.items.items():
+            item = self.item_objects[item_name]
+            print(f"{item_name} - {quantity}x ${item.price}")
+        print("--------------------------------------------")
+        print(f"Total: ${self.total_value()}")
 
 marabou = Item("Marabou", 3.95, 0.95, True)
 fazer = Item("Fazer", 3.50, 0.9, True)
@@ -164,6 +174,8 @@ cart.add(lindt, 1)
 order = Order(cart, inventory)
 order.place_order()
 order.display_order()
+order.print_receipt()
+
 #test
 print("")
 print("")

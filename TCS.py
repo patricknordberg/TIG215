@@ -297,18 +297,18 @@ class TestShoppingCart(unittest.TestCase):
 # --- Mock Customers ---
 
 member_customer = Customer(
-    name="Alice Johansson",
-    email="alice.johansson@email.com",
+    name="Charlie",
+    email="charlie@email.com",
     user_type="member",
-    address="Storgatan 14, 411 38 Göteborg, Sweden"
+    address="Candystreet 123"
 )
 
 wholesale_customer = Customer(
-    name="Erik Lindqvist",
-    email="erik.lindqvist@nordichocolate.se",
+    name="Willy Wonka",
+    email="chocolatefactory@email.com",
     user_type="wholesale",
-    address="Industrivägen 7, 252 25 Helsingborg, Sweden",
-    company_name="Nordic Chocolate AB"
+    address="Candy City 123",
+    company_name="ChocolateFactory"
 )
 
 # --- End Mock Customers ---

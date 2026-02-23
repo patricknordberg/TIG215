@@ -122,7 +122,7 @@ class PaymentMethod:
         self.details = details
 
     @staticmethod
-    def from_input(user_type: str):
+    def from_input(user_type: str, customer: "Customer" = None):
         print("\nPayment options:")
         print("1. Card")
         if user_type == "wholesale":
@@ -131,14 +131,23 @@ class PaymentMethod:
         choice = input("Choose payment method: ").strip()
 
         if choice == "1":
-            card_number = input("Card number: ").strip()
-            card_name = input("Name on card: ").strip()
-            expiry = input("Expiry date: ").strip()
-            return PaymentMethod("card", {
-                "card_number": card_number,
-                "card_name": card_name,
-                "expiry": expiry
-            })
+            card = getattr(customer, "card_details", None) if customer else None
+            if card:
+                print(f"Card number:  {card['card_number']}")
+                print(f"Name on card: {card['card_name']}")
+                print(f"Expiry:       {card['expiry']}")
+                return PaymentMethod("card", card)
+            else:
+                # Guest fallback — still prompt manually
+                card_number = input("Card number: ").strip()
+                card_name = input("Name on card: ").strip()
+                expiry = input("Expiry date: ").strip()
+                return PaymentMethod("card", {
+                    "card_number": card_number,
+                    "card_name": card_name,
+                    "expiry": expiry
+                })
+
         elif choice == "2" and user_type == "wholesale":
             company = input("Company name: ").strip()
             org_number = input("Organisation number: ").strip()
@@ -149,7 +158,6 @@ class PaymentMethod:
         else:
             print("Invalid payment option.")
             return None
-
 
 
 class Order:
@@ -296,22 +304,37 @@ class TestShoppingCart(unittest.TestCase):
 
 # --- Mock Customers ---
 
+# --- Mock Customers ---
+
 member_customer = Customer(
-    name="Alice Johansson",
-    email="alice.johansson@email.com",
+    name="Charlie Chonka",
+    email="charlie.chonka@chocolate.com",
     user_type="member",
-    address="Storgatan 14, 411 38 Göteborg, Sweden"
+    address="Cocoa Street 10, 411 38 Gothenburg, Sweden"
 )
+member_customer.card_details = {
+    "card_number": "**** **** **** 4821",
+    "card_name": "Charlie Chonka",
+    "expiry": "09/27"
+}
 
 wholesale_customer = Customer(
-    name="Erik Lindqvist",
-    email="erik.lindqvist@nordichocolate.se",
+    name="Willy Wonka",
+    email="willy.wonka@chocolatefactory.com",
     user_type="wholesale",
-    address="Industrivägen 7, 252 25 Helsingborg, Sweden",
-    company_name="Nordic Chocolate AB"
+    address="Chocolate Lane 123, 423 13 Gothenburg, Sweden",
+    company_name="Chocolate Factory AB"
 )
+wholesale_customer.card_details = {
+    "card_number": "**** **** **** 7364",
+    "card_name": "Willy Wonka",
+    "expiry": "03/26"
+}
 
 # --- End Mock Customers ---
+
+# --- End Mock Customers ---
+
 
 
 def run_shop():
@@ -426,9 +449,7 @@ def run_shop():
                     item = customer.cart.items[item_name]
                     print(f"{item.name} - {qty}x ${item.price}")
                 print(f"Subtotal: ${customer.cart.total_value()}")
-                print("\nShipping options:")
-                for provider, fee in Shipping.OPTIONS.items():
-                    print(f"  {provider} - ${fee}")
+
 
         elif action == "6":
             if not customer.cart.storage:
@@ -462,7 +483,7 @@ def run_shop():
             shipping = Shipping(shipping_choice)
 
             # Payment
-            payment = PaymentMethod.from_input(customer.user_type)
+            payment = PaymentMethod.from_input(customer.user_type, customer)
             if not payment:
                 continue
 

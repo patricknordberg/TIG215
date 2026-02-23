@@ -304,8 +304,6 @@ class TestShoppingCart(unittest.TestCase):
 
 # --- Mock Customers ---
 
-# --- Mock Customers ---
-
 member_customer = Customer(
     name="Charlie Chonka",
     email="charlie.chonka@chocolate.com",
@@ -330,8 +328,6 @@ wholesale_customer.card_details = {
     "card_name": "Willy Wonka",
     "expiry": "03/26"
 }
-
-# --- End Mock Customers ---
 
 # --- End Mock Customers ---
 

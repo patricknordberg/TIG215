@@ -1,20 +1,22 @@
 import unittest
 from datetime import datetime
 
+
 class Item:
-    def __init__(self, name: str, price: float, cost: float, wholesale_item: bool):
+    def __init__(self, name, price, cost, wholesale_item):
         self.name = name
         self.price = price
         self.cost = cost
         self.wholesale_item = wholesale_item
 
 
+# Superclass for both Inventory and ShoppingCart
 class ItemTracker:
     def __init__(self):
         self.storage = {}
         self.items = {}
 
-    def add(self, item: Item, quantity: int):
+    def add(self, item, quantity):
         if item.name not in self.storage:
             self.storage[item.name] = quantity
             self.items[item.name] = item
@@ -33,25 +35,28 @@ class ItemTracker:
         for name in self.items:
             item = self.items[name]
             quantity = self.storage[name]
-            print(f"{item.name} - Quantity: {quantity}")
+            print(item.name + " - Quantity: " + str(quantity))
 
+
+# Inventory is a subclass of ItemTracker
 class Inventory(ItemTracker):
 
-    def total_item_price(self, item: Item):
+    def total_item_price(self, item):
         if item.name not in self.storage:
             return 0
         quantity = self.storage[item.name]
         total = item.price * quantity
-        print(f"Total price for {item.name}: {total} $")
+        print("Total price for " + item.name + ": " + str(total) + " $")
         return total
 
 
+# ShoppingCart is a subclass of ItemTracker
 class ShoppingCart(ItemTracker):
-    def __init__(self, inventory: Inventory):
+    def __init__(self, inventory):
         super().__init__()
         self.inventory = inventory
 
-    def add(self, item: Item, quantity: int):
+    def add(self, item, quantity):
         if item.name in self.inventory.storage:
             available = self.inventory.storage[item.name]
 
@@ -64,11 +69,11 @@ class ShoppingCart(ItemTracker):
                 else:
                     self.storage[item.name] += quantity
             else:
-                print(f"Not enough in stock. {available} available.")
+                print("Not enough in stock. " + str(available) + " available.")
         else:
-            print(f"'{item.name}' is not available in inventory.")
+            print(item.name + " is not available in inventory.")
 
-    def remove(self, item: Item, quantity: int):
+    def remove(self, item, quantity):
         if item.name in self.storage:
             available = self.storage[item.name]
 
@@ -81,48 +86,49 @@ class ShoppingCart(ItemTracker):
 
                 self.inventory.storage[item.name] += quantity
             else:
-                print(f"Too many to remove. {quantity} available to remove.")
-
+                print("Too many to remove. " + str(available) + " available to remove.")
         else:
             print("Item not in cart!")
 
 
 class Category:
-    def __init__(self, name: str):
+    def __init__(self, name):
         self.name = name
         self.items = []
 
-    def add_item(self, item: Item):
+    def add_item(self, item):
         self.items.append(item)
 
     def display_items(self):
         for item in self.items:
-            print(f"{item.name} | {item.price} $")
+            print(item.name + " | " + str(item.price) + " $")
+
 
 class Shipping:
-    OPTIONS = {
-        "UPS": 4.99,
-        "DHL": 6.99,
-    }
+    ups_fee = 4.99
+    dhl_fee = 6.99
 
-    def __init__(self, provider: str):
+    def __init__(self, provider):
         provider = provider.upper()
-        if provider not in self.OPTIONS:
-            raise ValueError(f"Unknown shipping provider: {provider}. Choose UPS or DHL.")
+        if provider != "UPS" and provider != "DHL":
+            print("Unknown shipping provider. Choose UPS or DHL.")
+            return
         self.provider = provider
-        self.fee = self.OPTIONS[provider]
+        if provider == "UPS":
+            self.fee = self.ups_fee
+        else:
+            self.fee = self.dhl_fee
 
     def display(self):
-        print(f"Shipping: {self.provider} - ${self.fee}")
+        print("Shipping: " + self.provider + " - $" + str(self.fee))
 
 
 class PaymentMethod:
-    def __init__(self, method: str, details: dict):
+    def __init__(self, method, details):
         self.method = method  # "card" or "invoice"
         self.details = details
 
-    @staticmethod
-    def from_input(user_type: str, customer: "Customer" = None):
+    def get_payment(user_type, customer):
         print("\nPayment options:")
         print("1. Card")
         if user_type == "wholesale":
@@ -131,14 +137,13 @@ class PaymentMethod:
         choice = input("Choose payment method: ").strip()
 
         if choice == "1":
-            card = getattr(customer, "card_details", None) if customer else None
-            if card:
-                print(f"Card number:  {card['card_number']}")
-                print(f"Name on card: {card['card_name']}")
-                print(f"Expiry:       {card['expiry']}")
+            if customer != None and hasattr(customer, "card_details"):
+                card = customer.card_details
+                print("Card number:  " + card["card_number"])
+                print("Name on card: " + card["card_name"])
+                print("Expiry:       " + card["expiry"])
                 return PaymentMethod("card", card)
             else:
-                # Guest fallback — still prompt manually
                 card_number = input("Card number: ").strip()
                 card_name = input("Name on card: ").strip()
                 expiry = input("Expiry date: ").strip()
@@ -161,13 +166,13 @@ class PaymentMethod:
 
 
 class Order:
-    def __init__(self, cart: ShoppingCart, inventory: Inventory, shipping: Shipping = None, customer: "Customer" = None, payment: PaymentMethod = None, personal_details: dict = None):
+    def __init__(self, cart, inventory, shipping, customer, payment, personal_details):
         self.cart = cart
         self.inventory = inventory
         self.shipping = shipping
         self.customer = customer
         self.payment = payment
-        self.personal_details = personal_details or {}
+        self.personal_details = personal_details
         self.order_time = None
         self.items = {}
         self.item_objects = {}
@@ -181,7 +186,8 @@ class Order:
 
     def total_value(self):
         total = 0
-        for item_name, quantity in self.items.items():
+        for item_name in self.items:
+            quantity = self.items[item_name]
             item = self.item_objects[item_name]
             total += item.price * quantity
         if self.shipping:
@@ -191,37 +197,39 @@ class Order:
         return round(total, 2)
 
     def display_order(self):
-        print(f"Order placed at {self.order_time}")
-        print(f"Items ordered: ")
-        for item_name, quantity in self.items.items():
+        print("Order placed at " + str(self.order_time))
+        print("Items ordered:")
+        for item_name in self.items:
+            quantity = self.items[item_name]
             item = self.item_objects[item_name]
-            print(f"{item_name} | {quantity} | {item.price} $")
-        print(f"Total cost: {self.total_value()}$")
+            print(item_name + " | " + str(quantity) + " | " + str(item.price) + " $")
+        print("Total cost: " + str(self.total_value()) + "$")
         print("")
 
     def print_receipt(self):
         print("Receipt")
-        print(f"Date: {self.order_time}")
+        print("Date: " + str(self.order_time))
         print("--------------------------------------------")
         if self.personal_details:
-            print(f"Name:    {self.personal_details.get('name', '')}")
-            print(f"Email:   {self.personal_details.get('email', '')}")
-            print(f"Address: {self.personal_details.get('address', '')}")
+            print("Name:    " + self.personal_details.get("name", ""))
+            print("Email:   " + self.personal_details.get("email", ""))
+            print("Address: " + self.personal_details.get("address", ""))
             print("--------------------------------------------")
-        for item_name, quantity in self.items.items():
+        for item_name in self.items:
+            quantity = self.items[item_name]
             item = self.item_objects[item_name]
-            print(f"{item_name} - {quantity}x ${item.price}")
+            print(item_name + " - " + str(quantity) + "x $" + str(item.price))
         print("--------------------------------------------")
         if self.shipping:
-            print(f"Shipping ({self.shipping.provider}): ${self.shipping.fee}")
+            print("Shipping (" + self.shipping.provider + "): $" + str(self.shipping.fee))
         if self.customer and self.customer.user_type == "wholesale":
             print("Wholesale discount: -20%")
-        print(f"Total: ${self.total_value()}")
+        print("Total: $" + str(self.total_value()))
         print("--------------------------------------------")
 
 
 class Customer:
-    def __init__(self, name: str, email: str, user_type: str = "guest", address: str = "", company_name: str = ""):
+    def __init__(self, name, email, user_type, address, company_name):
         self.name = name
         self.email = email
         self.user_type = user_type  # "guest", "member", "wholesale"
@@ -230,27 +238,29 @@ class Customer:
         self.orders = []
         self.cart = None
 
-    def create_cart(self, inventory: Inventory):
+    def create_cart(self, inventory):
         self.cart = ShoppingCart(inventory)
         return self.cart
 
-    def place_order(self, inventory: Inventory, shipping: Shipping = None, payment: PaymentMethod = None, personal_details: dict = None):
+    def place_order(self, inventory, shipping, payment, personal_details):
         if not self.cart or not self.cart.storage:
-            print("Cart is empty or does not exist.")
+            print("Cart is empty.")
             return None
-        order = Order(self.cart, inventory, shipping, customer=self, payment=payment, personal_details=personal_details)
+        order = Order(self.cart, inventory, shipping, self, payment, personal_details)
         order.place_order()
         self.orders.append(order)
         return order
 
     def display_orders(self):
         if not self.orders:
-            print(f"{self.name} has no orders.")
+            print(self.name + " has no orders.")
             return
-        print(f"Orders for {self.name}:")
-        for i, order in enumerate(self.orders, 1):
-            print(f"\nOrder #{i}")
+        print("Orders for " + self.name + ":")
+        i = 1
+        for order in self.orders:
+            print("\nOrder #" + str(i))
             order.display_order()
+            i += 1
 
     def print_last_receipt(self):
         if not self.orders:
@@ -259,8 +269,13 @@ class Customer:
         self.orders[-1].print_receipt()
 
     def total_spent(self):
-        return sum(order.total_value() for order in self.orders)
+        total = 0
+        for order in self.orders:
+            total += order.total_value()
+        return total
 
+
+# ---- Unit Tests ----
 
 class TestShoppingCart(unittest.TestCase):
     def setUp(self):
@@ -302,13 +317,60 @@ class TestShoppingCart(unittest.TestCase):
         self.assertEqual(self.inventory.storage["Test Chocolate"], 5)
 
 
-# --- Mock Customers ---
+class TestWholesaleDiscount(unittest.TestCase):
+    def setUp(self):
+        self.inventory = Inventory()
+
+        self.item1 = Item("Test Chocolate", 10.00, 5.00, True)
+        self.item2 = Item("Test Toffee", 20.00, 10.00, True)
+
+        self.inventory.add(self.item1, 10)
+        self.inventory.add(self.item2, 10)
+
+        self.wholesale = Customer("Shajan", "shajan@test.com", "wholesale", "", "")
+        self.member = Customer("Dino", "Dino@test.com", "member", "", "")
+
+    def test_wholesale_discount_applied(self):
+        self.wholesale.create_cart(self.inventory)
+        self.wholesale.cart.add(self.item1, 2)
+        shipping = Shipping("UPS")
+        order = self.wholesale.place_order(self.inventory, shipping, None, {})
+        expected = round((20.00 + 4.99) * 0.8, 2)
+        self.assertAlmostEqual(order.total_value(), expected, places=2)
+
+    def test_member_no_discount(self):
+        self.member.create_cart(self.inventory)
+        self.member.cart.add(self.item2, 1)
+        shipping = Shipping("DHL")
+        order = self.member.place_order(self.inventory, shipping, None, {})
+        expected = round(20.00 + 6.99, 2)
+        self.assertAlmostEqual(order.total_value(), expected, places=2)
+
+    def test_wholesale_discount_without_shipping(self):
+        self.wholesale.create_cart(self.inventory)
+        self.wholesale.cart.add(self.item1, 5)
+        order = self.wholesale.place_order(self.inventory, None, None, {})
+        expected = round(50.00 * 0.8, 2)
+        self.assertAlmostEqual(order.total_value(), expected, places=2)
+
+    def test_wholesale_discount_multiple_items(self):
+        self.wholesale.create_cart(self.inventory)
+        self.wholesale.cart.add(self.item1, 3)
+        self.wholesale.cart.add(self.item2, 2)
+        shipping = Shipping("UPS")
+        order = self.wholesale.place_order(self.inventory, shipping, None, {})
+        expected = round((30.00 + 40.00 + 4.99) * 0.8, 2)
+        self.assertAlmostEqual(order.total_value(), expected, places=2)
+
+
+# ---- Mock Customers ----
 
 member_customer = Customer(
     name="Charlie Chonka",
     email="charlie.chonka@chocolate.com",
     user_type="member",
-    address="Cocoa Street 10, 411 38 Gothenburg, Sweden"
+    address="Cocoa Street 10, 411 38 Gothenburg, Sweden",
+    company_name=""
 )
 member_customer.card_details = {
     "card_number": "**** **** **** 4821",
@@ -329,12 +391,10 @@ wholesale_customer.card_details = {
     "expiry": "03/26"
 }
 
-# --- End Mock Customers ---
-
+# ---- End Mock Customers ----
 
 
 def run_shop():
-    # setup items
     marabou = Item("Marabou", 3.95, 0.95, True)
     fazer = Item("Fazer", 3.50, 0.9, True)
     lindt = Item("Lindt", 6.95, 1.5, True)
@@ -356,7 +416,6 @@ def run_shop():
     inventory.add(lindt, 3)
     inventory.add(excellanz, 4)
 
-    # login or guest
     print("Welcome to the Chocolate Shop!")
     print("1. Continue as guest")
     print("2. Log in as member")
@@ -365,17 +424,16 @@ def run_shop():
 
     if choice == "2":
         customer = member_customer
-        print(f"\nHello {customer.name}! Logged in as member.")
+        print("\nHello " + customer.name + "! Logged in as member.")
     elif choice == "3":
         customer = wholesale_customer
-        print(f"\nHello {customer.name} ({customer.company_name})! Logged in as wholesale user (20% discount applied at checkout).")
+        print("\nHello " + customer.name + " (" + customer.company_name + ")! Logged in as wholesale user (20% discount applied at checkout).")
     else:
-        customer = Customer("Guest", "", user_type="guest")
+        customer = Customer("Guest", "", "guest", "", "")
         print("\nContinuing as guest.")
 
     customer.create_cart(inventory)
 
-    # main loop
     while True:
         print("\nWhat do you want to do?")
         print("1. Browse categories")
@@ -400,9 +458,10 @@ def run_shop():
 
         elif action == "2":
             print("\nAll items:")
-            for name, item in inventory.items.items():
+            for name in inventory.items:
+                item = inventory.items[name]
                 stock = inventory.storage[name]
-                print(f"{item.name} - ${item.price} (in stock: {stock})")
+                print(item.name + " - $" + str(item.price) + " (in stock: " + str(stock) + ")")
 
         elif action == "3":
             item_name = input("Enter item name: ")
@@ -418,7 +477,7 @@ def run_shop():
             if item:
                 customer.cart.add(item, quantity)
             else:
-                print(f"{item_name} not found. Check the spelling.")
+                print(item_name + " not found. Check the spelling.")
 
         elif action == "4":
             item_name = input("Enter item name to remove: ")
@@ -434,32 +493,34 @@ def run_shop():
             if item:
                 customer.cart.remove(item, quantity)
             else:
-                print(f"{item_name} not found.")
+                print(item_name + " not found.")
 
         elif action == "5":
             if not customer.cart.storage:
                 print("Your cart is empty.")
             else:
                 print("\nYour cart:")
-                for item_name, qty in customer.cart.storage.items():
+                for item_name in customer.cart.storage:
+                    qty = customer.cart.storage[item_name]
                     item = customer.cart.items[item_name]
-                    print(f"{item.name} - {qty}x ${item.price}")
-                print(f"Subtotal: ${customer.cart.total_value()}")
-
+                    print(item.name + " - " + str(qty) + "x $" + str(item.price))
+                print("Subtotal: $" + str(customer.cart.total_value()))
+                print("\nShipping options:")
+                print("  UPS - $4.99")
+                print("  DHL - $6.99")
 
         elif action == "6":
             if not customer.cart.storage:
                 print("Your cart is empty.")
                 continue
 
-            # Personal details
             print("\nPersonal details:")
             if customer.user_type != "guest" and customer.name and customer.email:
-                print(f"Name:    {customer.name}")
-                print(f"Email:   {customer.email}")
-                print(f"Address: {customer.address}")
+                print("Name:    " + customer.name)
+                print("Email:   " + customer.email)
+                print("Address: " + customer.address)
                 if customer.user_type == "wholesale" and customer.company_name:
-                    print(f"Company: {customer.company_name}")
+                    print("Company: " + customer.company_name)
                 personal_details = {"name": customer.name, "email": customer.email, "address": customer.address}
             else:
                 name = input("Name: ").strip()
@@ -467,19 +528,16 @@ def run_shop():
                 address = input("Address: ").strip()
                 personal_details = {"name": name, "email": email, "address": address}
 
-            # Shipping
             print("\nChoose a shipping option:")
-            for provider, fee in Shipping.OPTIONS.items():
-                print(f"  {provider} - ${fee}")
-
+            print("  UPS - $4.99")
+            print("  DHL - $6.99")
             shipping_choice = input("Enter UPS or DHL: ").strip().upper()
-            if shipping_choice not in Shipping.OPTIONS:
+            if shipping_choice != "UPS" and shipping_choice != "DHL":
                 print("Invalid shipping option. Please enter UPS or DHL.")
                 continue
             shipping = Shipping(shipping_choice)
 
-            # Payment
-            payment = PaymentMethod.from_input(customer.user_type, customer)
+            payment = PaymentMethod.get_payment(customer.user_type, customer)
             if not payment:
                 continue
 

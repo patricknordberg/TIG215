@@ -1,6 +1,8 @@
 from datetime import datetime
 
 
+
+
 class Item:
     def __init__(self, name, price, cost, wholesale_item):
         self.name = name
@@ -33,12 +35,12 @@ class ItemTracker:
             print(name + " - qty: " + str(self.storage[name]) + " - $" + str(self.items[name].price))
 
 
-# Inventory is a subclass of ItemTracker
+
 class Inventory(ItemTracker):
     pass
 
 
-# ShoppingCart is a subclass of ItemTracker
+
 class ShoppingCart(ItemTracker):
     def __init__(self, inventory):
         super().__init__()
@@ -199,8 +201,7 @@ class Customer:
         self.orders.append(order)
         return order
 
-
-# ---- Unit Tests ----
+#Tests
 import unittest
 
 class TestShoppingCart(unittest.TestCase):
@@ -238,19 +239,16 @@ class TestShoppingCart(unittest.TestCase):
         self.assertNotIn("Test Chocolate", self.cart.storage)
 
 
-# ---- Mock customers ----
 member_customer = Customer("Charlie Chonka", "charlie@choc.com", "member", "Cocoa Street 10")
 wholesale_customer = Customer("Willy Wonka", "willy@factory.com", "wholesale", "Chocolate Lane 123", "Chocolate Factory AB")
 
 
 def run_shop():
-    # Items
     marabou = Item("Marabou", 3.95, 0.95, True)
     fazer = Item("Fazer", 3.50, 0.90, True)
     lindt = Item("Lindt", 6.95, 1.50, True)
     excellanz = Item("Excellanz", 7.95, 1.00, True)
 
-    # Categories
     milk = Category("Milk Chocolates")
     dark = Category("Dark Chocolates")
     milk.add_item(marabou)
@@ -259,14 +257,12 @@ def run_shop():
     dark.add_item(excellanz)
     categories = {"1": milk, "2": dark}
 
-    # Inventory
     inventory = Inventory()
     inventory.add(marabou, 5)
     inventory.add(fazer, 8)
     inventory.add(lindt, 3)
     inventory.add(excellanz, 4)
 
-    # Login
     print("Welcome to the Chocolate Shop!")
     print("1. Guest  2. Member  3. Wholesale")
     choice = input("Login: ").strip()
@@ -282,7 +278,6 @@ def run_shop():
     print("Hello " + customer.name + "!")
     customer.create_cart(inventory)
 
-    # Main loop
     while True:
         print("\n1. View items  2. Browse categories  3. Add to cart  4. Remove from cart  5. View cart  6. Checkout  7. Quit")
         action = input("Choose: ").strip()
@@ -357,5 +352,5 @@ def run_shop():
 
 
 if __name__ == "__main__":
-    #run_shop()
-    unittest.main()  # uncomment to run tests instead
+    run_shop()
+    #unittest.main()

@@ -1,7 +1,5 @@
 from datetime import datetime
-
-
-
+import db
 
 class Item:
     def __init__(self, name, price, cost, wholesale_item):
@@ -11,7 +9,6 @@ class Item:
         self.wholesale_item = wholesale_item
 
 
-# Superclass for Inventory and ShoppingCart
 class ItemTracker:
     def __init__(self):
         self.storage = {}
@@ -244,24 +241,24 @@ wholesale_customer = Customer("Willy Wonka", "willy@factory.com", "wholesale", "
 
 
 def run_shop():
-    marabou = Item("Marabou", 3.95, 0.95, True)
-    fazer = Item("Fazer", 3.50, 0.90, True)
-    lindt = Item("Lindt", 6.95, 1.50, True)
-    excellanz = Item("Excellanz", 7.95, 1.00, True)
+    caramel = Item("Caramel", 1.25, 0.71, True)
+    dct = Item("Dark Chocolate Truffles", 2.50, 1.43, True)
+    mct = Item("Milk Chocolate Truffles", 1.25, 0.71, True)
+    pbc = Item("Peanut Butter Cups", 1.0, 0.57, True)
 
     milk = Category("Milk Chocolates")
     dark = Category("Dark Chocolates")
-    milk.add_item(marabou)
-    milk.add_item(fazer)
-    dark.add_item(lindt)
-    dark.add_item(excellanz)
+    milk.add_item(caramel)
+    milk.add_item(dct)
+    dark.add_item(mct)
+    dark.add_item(pbc)
     categories = {"1": milk, "2": dark}
 
     inventory = Inventory()
-    inventory.add(marabou, 5)
-    inventory.add(fazer, 8)
-    inventory.add(lindt, 3)
-    inventory.add(excellanz, 4)
+    inventory.add(caramel, 975)
+    inventory.add(dct, 285)
+    inventory.add(mct, 881)
+    inventory.add(pbc, 995)
 
     print("Welcome to the Chocolate Shop!")
     print("1. Guest  2. Member  3. Wholesale")
@@ -352,5 +349,9 @@ def run_shop():
 
 
 if __name__ == "__main__":
-    run_shop()
+    #run_shop()
+
+    rows = db.load_inventory()
+    for row in rows:
+        print(row["name"])
     #unittest.main()

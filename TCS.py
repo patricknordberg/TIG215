@@ -351,7 +351,14 @@ def run_shop():
 if __name__ == "__main__":
     #run_shop()
 
-    rows = db.load_inventory()
+    rows = db.cart_summary()
     for row in rows:
-        print(row["name"])
-    #unittest.main()
+        print(row["cName"], "| cart:", row["cartID"], "| status:", row["status"], "| qty:", row["total_quantity"])
+
+    print("")
+
+    rows = db.best_selling_items()
+    for row in rows:
+        print(f"{row["item_name"]} | Category: {row["Category"]} | Quantity: {row["total_sold"]}")
+
+#unittest.main()

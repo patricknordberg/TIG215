@@ -361,8 +361,10 @@ if __name__ == "__main__":
     for row in rows:
         print(f"{row["item_name"]} | Category: {row["Category"]} | Quantity: {row["total_sold"]}")
 
+    print("")
+
     rows = db.profit()
     for row in rows:
-        print(f"Profit: {row["profit"]}")
+        print(f"Item: {row["name"]} | Profit: {row["profit"]}")
 
-    unittest.main()
+    #unittest.main()

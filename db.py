@@ -71,7 +71,7 @@ def profit():
         FROM Item 
         GROUP BY itemID
         ORDER BY profit DESC
-            """)
+    """)
     rows = cursor.fetchall()
     conn.close()
     return rows

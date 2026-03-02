@@ -63,6 +63,19 @@ def load_cart(cart_id):
     conn.close()
     return rows
 
+def profit():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT name, SUM(price-cost) AS profit
+        FROM Item 
+        GROUP BY itemID
+        ORDER BY profit DESC
+            """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
 def best_selling_items():
     conn = get_connection()
     cursor = conn.cursor()

@@ -353,7 +353,7 @@ if __name__ == "__main__":
 
     rows = db.cart_summary()
     for row in rows:
-        print(row["cName"], "| cart:", row["cartID"], "| status:", row["status"], "| qty:", row["total_quantity"])
+        print(f"{row["cName"]} | cart: {row["cartID"]} | status: {row["status"]} | Quantity: {row["total_quantity"]}")
 
     print("")
 

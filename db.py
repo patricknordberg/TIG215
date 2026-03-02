@@ -10,8 +10,6 @@ def get_connection():
     return conn
 
 
-# ---- Items & Inventory ----
-
 def load_inventory():
     conn = get_connection()
     cursor = conn.cursor()
@@ -40,8 +38,6 @@ def load_categories():
     return rows
 
 
-# ---- Customers ----
-
 def load_customers():
     conn = get_connection()
     cursor = conn.cursor()
@@ -53,95 +49,6 @@ def load_customers():
     rows = cursor.fetchall()
     conn.close()
     return rows
-
-
-# ---- Cart ----
-
-def create_cart(customer_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO Cart (customerID, createdDate, status)
-        VALUES (?, date('now'), 'active')
-    """, (customer_id,))
-    cart_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return cart_id
-
-
-def add_to_cart(cart_id, item_name, quantity):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    # Get itemID from name
-    cursor.execute("SELECT itemID FROM Item WHERE name = ?", (item_name,))
-    row = cursor.fetchone()
-    if not row:
-        print(item_name + " not found in database.")
-        conn.close()
-        return
-
-    item_id = row["itemID"]
-
-    # Check if item already in cart
-    cursor.execute("""
-        SELECT cartLineID, quantity FROM CartLine
-        WHERE cartID = ? AND itemID = ?
-    """, (cart_id, item_id))
-    existing = cursor.fetchone()
-
-    if existing:
-        cursor.execute("""
-            UPDATE CartLine SET quantity = quantity + ?
-            WHERE cartLineID = ?
-        """, (quantity, existing["cartLineID"]))
-    else:
-        cursor.execute("""
-            INSERT INTO CartLine (cartID, itemID, quantity)
-            VALUES (?, ?, ?)
-        """, (cart_id, item_id, quantity))
-
-    conn.commit()
-    conn.close()
-
-
-def remove_from_cart(cart_id, item_name, quantity):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT itemID FROM Item WHERE name = ?", (item_name,))
-    row = cursor.fetchone()
-    if not row:
-        print(item_name + " not found in database.")
-        conn.close()
-        return
-
-    item_id = row["itemID"]
-
-    cursor.execute("""
-        SELECT cartLineID, quantity FROM CartLine
-        WHERE cartID = ? AND itemID = ?
-    """, (cart_id, item_id))
-    existing = cursor.fetchone()
-
-    if not existing:
-        print(item_name + " not in cart.")
-        conn.close()
-        return
-
-    new_qty = existing["quantity"] - quantity
-    if new_qty <= 0:
-        cursor.execute("DELETE FROM CartLine WHERE cartLineID = ?", (existing["cartLineID"],))
-    else:
-        cursor.execute("""
-            UPDATE CartLine SET quantity = ?
-            WHERE cartLineID = ?
-        """, (new_qty, existing["cartLineID"]))
-
-    conn.commit()
-    conn.close()
-
 
 def load_cart(cart_id):
     conn = get_connection()
@@ -156,19 +63,6 @@ def load_cart(cart_id):
     conn.close()
     return rows
 
-
-def checkout_cart(cart_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE Cart SET status = 'completed'
-        WHERE cartID = ?
-    """, (cart_id,))
-    conn.commit()
-    conn.close()
-
-
-# ---- Complex Queries ----
 def best_selling_items():
     conn = get_connection()
     cursor = conn.cursor()
@@ -186,7 +80,6 @@ def best_selling_items():
     conn.close()
     return rows
 
-
 def cart_summary():
     conn = get_connection()
     cursor = conn.cursor()
@@ -203,47 +96,3 @@ def cart_summary():
     rows = cursor.fetchall()
     conn.close()
     return rows
-
-
-# ---- Save Order ----
-
-def save_order(customer_id, order):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    # Insert into Order
-    cursor.execute("""
-        INSERT INTO "Order" (customerID, orderDate)
-        VALUES (?, ?)
-    """, (customer_id, str(order.order_time.date())))
-    order_id = cursor.lastrowid
-
-    # Insert each Orderline
-    for item_name in order.items:
-        quantity = order.items[item_name]
-        item = order.item_objects[item_name]
-        cursor.execute("""
-            SELECT itemID FROM Item WHERE name = ?
-        """, (item_name,))
-        row = cursor.fetchone()
-        if row:
-            cursor.execute("""
-                INSERT INTO Orderline (orderID, itemID, quantity)
-                VALUES (?, ?, ?)
-            """, (order_id, row["itemID"], quantity))
-
-    # Insert Payment
-    if order.payment:
-        cursor.execute("""
-            INSERT INTO Payment (orderID, payment_type, payment_date, total_amount)
-            VALUES (?, ?, ?, ?)
-        """, (
-            order_id,
-            order.payment.method,
-            str(order.order_time.date()),
-            order.total_value()
-        ))
-
-    conn.commit()
-    conn.close()
-    print("Order saved to database.")

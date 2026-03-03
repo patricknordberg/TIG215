@@ -376,3 +376,5 @@ if __name__ == "__main__":
     for row in rows:
         print(
             f'Customer: {row["customerID"]} | Total spent: {row["total_spent"]}')'''
+
+    #unittest.main()

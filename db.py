@@ -50,6 +50,7 @@ def load_customers():
     conn.close()
     return rows
 
+
 def load_cart(cart_id):
     conn = get_connection()
     cursor = conn.cursor()
@@ -63,6 +64,7 @@ def load_cart(cart_id):
     conn.close()
     return rows
 
+
 def profit():
     conn = get_connection()
     cursor = conn.cursor()
@@ -75,6 +77,7 @@ def profit():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
 
 def best_selling_items():
     conn = get_connection()
@@ -92,6 +95,22 @@ def best_selling_items():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+
+def total_sales_customer():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT o.customerID, SUM(p.total_amount) AS total_spent
+        FROM Payment p 
+        JOIN "Order" o ON p.orderID = o.orderID
+        GROUP BY o.customerID
+        ORDER BY total_spent DESC; 
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
 
 def cart_summary():
     conn = get_connection()

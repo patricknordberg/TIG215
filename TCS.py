@@ -1,5 +1,7 @@
+import unittest
 from datetime import datetime
 import db
+
 
 class Item:
     def __init__(self, name, price, cost, wholesale_item):
@@ -29,13 +31,12 @@ class ItemTracker:
 
     def display(self):
         for name in self.items:
-            print(name + " - qty: " + str(self.storage[name]) + " - $" + str(self.items[name].price))
-
+            print(
+                f'{name} - qty: {self.storage[name]}  - $  {self.items[name].price}')
 
 
 class Inventory(ItemTracker):
     pass
-
 
 
 class ShoppingCart(ItemTracker):
@@ -45,11 +46,11 @@ class ShoppingCart(ItemTracker):
 
     def add(self, item, quantity):
         if item.name not in self.inventory.storage:
-            print(item.name + " not found in inventory.")
+            print(f'{item.name} not found in inventory.')
             return
         available = self.inventory.storage[item.name]
         if quantity > available:
-            print("Only " + str(available) + " in stock.")
+            print(f'Only {available} in stock.')
             return
         self.inventory.storage[item.name] -= quantity
         if item.name not in self.storage:
@@ -60,11 +61,11 @@ class ShoppingCart(ItemTracker):
 
     def remove(self, item, quantity):
         if item.name not in self.storage:
-            print(item.name + " not in cart.")
+            print(f'{item.name} not in cart.')
             return
         available = self.storage[item.name]
         if quantity > available:
-            print("Only " + str(available) + " in cart.")
+            print(f'Only {available} in cart.')
             return
         self.storage[item.name] -= quantity
         self.inventory.storage[item.name] += quantity
@@ -83,7 +84,7 @@ class Category:
 
     def display_items(self):
         for item in self.items:
-            print(item.name + " - $" + str(item.price))
+            print(f'{item.name} - $ {item.price}')
 
 
 class Shipping:
@@ -160,19 +161,19 @@ class Order:
 
     def print_receipt(self):
         print("\n--- Receipt ---")
-        print("Date: " + str(self.order_time))
-        print("Customer: " + self.customer.name + " (" + self.customer.user_type + ")")
+        print(f'Date: {self.order_time}')
+        print(f'Customer: {self.customer.name} {self.customer.user_type}')
         print("---")
         for name in self.items:
             qty = self.items[name]
             price = self.item_objects[name].price
-            print(name + " x" + str(qty) + " - $" + str(price))
+            print(f'{name} x{qty} - ${price}')
         print("---")
         if self.shipping:
-            print("Shipping (" + self.shipping.provider + "): $" + str(self.shipping.fee))
+            print(f'Shipping {self.shipping.provider}: ${self.shipping.fee}')
         if self.customer.user_type == "wholesale":
             print("Wholesale discount: -20%")
-        print("Total: $" + str(self.total_value()))
+        print(f'Total: ${self.total_value()}')
         print("---------------\n")
 
 
@@ -198,8 +199,9 @@ class Customer:
         self.orders.append(order)
         return order
 
-#Tests
-import unittest
+
+# Tests
+
 
 class TestShoppingCart(unittest.TestCase):
     def setUp(self):
@@ -236,15 +238,16 @@ class TestShoppingCart(unittest.TestCase):
         self.assertNotIn("Test Chocolate", self.cart.storage)
 
 
-member_customer = Customer("Charlie Chonka", "charlie@choc.com", "member", "Cocoa Street 10")
-wholesale_customer = Customer("Willy Wonka", "willy@factory.com", "wholesale", "Chocolate Lane 123", "Chocolate Factory AB")
-
-
 def run_shop():
     caramel = Item("Caramel", 1.25, 0.71, True)
     dct = Item("Dark Chocolate Truffles", 2.50, 1.43, True)
     mct = Item("Milk Chocolate Truffles", 1.25, 0.71, True)
     pbc = Item("Peanut Butter Cups", 1.0, 0.57, True)
+
+    member_customer = Customer(
+        "Charlie Chonka", "charlie@choc.com", "member", "Cocoa Street 10")
+    wholesale_customer = Customer("Willy Wonka", "willy@factory.com",
+                                  "wholesale", "Chocolate Lane 123", "Chocolate Factory AB")
 
     milk = Category("Milk Chocolates")
     dark = Category("Dark Chocolates")
@@ -272,7 +275,7 @@ def run_shop():
         name = input("Your name: ").strip()
         customer = Customer(name, "", "guest", "")
 
-    print("Hello " + customer.name + "!")
+    print(f'Hello {customer.name}!')
     customer.create_cart(inventory)
 
     while True:
@@ -301,7 +304,7 @@ def run_shop():
             if item:
                 customer.cart.add(item, int(qty))
             else:
-                print(name + " not found.")
+                print(f'{name} not found.')
 
         elif action == "4":
             customer.cart.display()
@@ -314,14 +317,14 @@ def run_shop():
             if item:
                 customer.cart.remove(item, int(qty))
             else:
-                print(name + " not found.")
+                print(f'{name} not found.')
 
         elif action == "5":
             if not customer.cart.storage:
                 print("Cart is empty.")
             else:
                 customer.cart.display()
-                print("Subtotal: $" + str(customer.cart.total_value()))
+                print(f'Subtotal: $ {customer.cart.total_value()}')
 
         elif action == "6":
             if not customer.cart.storage:
@@ -349,22 +352,27 @@ def run_shop():
 
 
 if __name__ == "__main__":
-    #run_shop()
+    run_shop()
 
-    rows = db.cart_summary()
+    '''rows = db.cart_summary()
     for row in rows:
-        print(f"{row["cName"]} | cart: {row["cartID"]} | status: {row["status"]} | Quantity: {row["total_quantity"]}")
+        print(
+            f'{row["cName"]} | cart: {row["cartID"]} | status: {row["status"]} | Quantity: {row["total_quantity"]}')
 
     print("")
 
     rows = db.best_selling_items()
     for row in rows:
-        print(f"{row["item_name"]} | Category: {row["Category"]} | Quantity: {row["total_sold"]}")
+        print(
+            f'{row["item_name"]} | Category: {row["Category"]} | Quantity: {row["total_sold"]}')
 
     print("")
 
     rows = db.profit()
     for row in rows:
-        print(f"Item: {row["name"]} | Profit: {row["profit"]}")
+        print(f'Item: {row["name"]} | Profit: {row["profit"]}')
 
-    #unittest.main()
+    rows = db.total_sales_customer()
+    for row in rows:
+        print(
+            f'Customer: {row["customerID"]} | Total spent: {row["total_spent"]}')'''

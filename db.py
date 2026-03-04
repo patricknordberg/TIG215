@@ -128,3 +128,14 @@ def cart_summary():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def add_customer(name, address, user_type, email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO Customer (cName, cAddress, userType, email)
+        VALUES (?, ?, ?, ?)
+    """, (name, address, user_type, email))
+    conn.commit()
+    conn.close()
+    print("Customer added.")

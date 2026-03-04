@@ -202,7 +202,6 @@ class Customer:
 
 # Tests
 
-
 class TestShoppingCart(unittest.TestCase):
     def setUp(self):
         self.inventory = Inventory()
@@ -272,8 +271,12 @@ def run_shop():
     elif choice == "3":
         customer = wholesale_customer
     else:
-        name = input("Your name: ").strip()
-        customer = Customer(name, "", "guest", "")
+        cName = input("Your name: ").strip()
+        customer = Customer(cName, "", "guest", "")
+        cAddress = input("Your address: ").strip()
+        email = input("Your email: ").strip()
+        db.add_customer(cName, cAddress, "member", email)
+
 
     print(f'Hello {customer.name}!')
     customer.create_cart(inventory)
@@ -354,10 +357,10 @@ def run_shop():
 if __name__ == "__main__":
     run_shop()
 
-    '''rows = db.cart_summary()
+    """rows = db.cart_summary()
     for row in rows:
         print(
-            f'{row["cName"]} | cart: {row["cartID"]} | status: {row["status"]} | Quantity: {row["total_quantity"]}')
+            f'{row["cName"]} | cartID: {row["cartID"]} | status: {row["status"]} | Quantity: {row["total_quantity"]}')
 
     print("")
 
@@ -375,6 +378,8 @@ if __name__ == "__main__":
     rows = db.total_sales_customer()
     for row in rows:
         print(
-            f'Customer: {row["customerID"]} | Total spent: {row["total_spent"]}')'''
+            f'Customer: {row["customerID"]} | Total spent: {row["total_spent"]}')"""
+
+
 
     #unittest.main()
